@@ -171,9 +171,15 @@ export default function ModulePage({ params }: ModulePageProps) {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center relative overflow-hidden">
+        {/* Ambient loading effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="text-center relative z-10">
+          <div className="w-16 h-16 border-4 border-purple-400/30 border-t-purple-400 rounded-full animate-spin mx-auto mb-4" />
           <p className="text-white text-lg">Loading...</p>
         </div>
       </div>
@@ -186,14 +192,21 @@ export default function ModulePage({ params }: ModulePageProps) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+        {/* Ambient background effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-violet-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+        </div>
+        
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-red-500/20 border border-red-500 rounded-lg p-6 text-center">
+        <div className="container mx-auto px-4 py-8 relative z-10">
+          <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-6 text-center backdrop-blur-xl shadow-lg">
             <p className="text-white text-lg mb-4">{error}</p>
             <button
               onClick={fetchData}
-              className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors"
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-red-500/25"
             >
               Try Again
             </button>
@@ -206,10 +219,23 @@ export default function ModulePage({ params }: ModulePageProps) {
   // If module data is still loading, show skeleton
   if (!module) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+        {/* Ambient background effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-violet-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+          
+          {/* Subtle grid pattern overlay */}
+          <div className="absolute inset-0 opacity-[0.02]" style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(147, 51, 234, 0.3) 1px, transparent 0)`,
+            backgroundSize: '24px 24px'
+          }}></div>
+        </div>
+        
         <Navbar />
         
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 relative z-10">
           <div className="mb-8">
             <Link
               href="/dashboard"
@@ -296,10 +322,28 @@ export default function ModulePage({ params }: ModulePageProps) {
   const progressPercentage = totalItems > 0 ? (completedItems / totalItems) * 100 : 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+      {/* Ambient Background Effects */}
+      <div className="absolute inset-0">
+        {/* Primary ambient glow */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-violet-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+        
+        {/* Subtle grid pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.02]" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(147, 51, 234, 0.3) 1px, transparent 0)`,
+          backgroundSize: '24px 24px'
+        }}></div>
+        
+        {/* Gradient mesh overlay */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/10 via-transparent to-indigo-900/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-bl from-violet-900/5 via-transparent to-purple-900/5"></div>
+      </div>
+      
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 relative z-10">
         <div className="mb-8">
           <Link
             href="/dashboard"

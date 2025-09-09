@@ -1,6 +1,6 @@
-# N8n Mastery Course
+# Build Different - N8N Mastery Course
 
-A comprehensive web application for learning N8n automation from beginner to expert level. This gamified learning platform integrates with Discord for community engagement and progress tracking.
+A comprehensive web application for learning N8N automation from beginner to expert level. This gamified learning platform integrates with Discord for community engagement and progress tracking.
 
 ## 🚀 Features
 
@@ -242,4 +242,4 @@ If you encounter any issues:
 
 ---
 
-Built with ❤️ for the N8n community
+Built with ❤️ for the automation community

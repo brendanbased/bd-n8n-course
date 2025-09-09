@@ -6,8 +6,8 @@ import { AuthProvider } from '@/components/providers/auth-provider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'N8n Mastery Course',
-  description: 'Learn N8n automation from beginner to expert',
+  title: 'Build Different - N8N Mastery Course',
+  description: 'Master AI automation from beginner to expert with the most comprehensive N8N training available',
 }
 
 export default function RootLayout({

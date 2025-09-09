@@ -7,6 +7,7 @@ import { DatabaseService, DataTransformer } from '@/lib/database'
 import { ModuleCard } from '@/components/course/module-card'
 import { ProgressOverview } from '@/components/course/progress-overview'
 import { DeveloperReset } from '@/components/course/developer-reset'
+import { ResourceCard } from '@/components/course/resource-card'
 import { Navbar } from '@/components/layout/navbar'
 import { Module, Lesson, Project, UserProgress } from '@/types'
 
@@ -29,21 +30,6 @@ export default function Dashboard() {
     fetchData()
   }, [session, status, router])
 
-  // Prevent rendering if no session
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white text-lg">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return null // Don't render anything while redirecting
-  }
 
   const fetchData = async () => {
     try {
@@ -79,11 +65,17 @@ export default function Dashboard() {
   }
 
   // Only show loading screen for session loading, not data loading
-  if (status === 'loading') {
+  if (status === 'loading' || !session) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center relative overflow-hidden">
+        {/* Ambient loading effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="text-center relative z-10">
+          <div className="w-16 h-16 border-4 border-purple-400/30 border-t-purple-400 rounded-full animate-spin mx-auto mb-4" />
           <p className="text-white text-lg">Loading...</p>
         </div>
       </div>
@@ -92,14 +84,21 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+        {/* Ambient background effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-violet-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+        </div>
+        
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-red-500/20 border border-red-500 rounded-lg p-6 text-center">
+        <div className="container mx-auto px-4 py-8 relative z-10">
+          <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-6 text-center backdrop-blur-xl shadow-lg">
             <p className="text-white text-lg mb-4">{error}</p>
             <button
               onClick={fetchData}
-              className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors"
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-red-500/25"
             >
               Try Again
             </button>
@@ -112,16 +111,29 @@ export default function Dashboard() {
   // If modules are still loading, show skeleton
   if (modules.length === 0 && !error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+        {/* Ambient background effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-violet-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+          
+          {/* Subtle grid pattern overlay */}
+          <div className="absolute inset-0 opacity-[0.02]" style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(147, 51, 234, 0.3) 1px, transparent 0)`,
+            backgroundSize: '24px 24px'
+          }}></div>
+        </div>
+        
         <Navbar />
         
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 relative z-10">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-br from-white via-purple-50 to-violet-100 bg-clip-text text-transparent mb-2">
               Welcome back, {session.user?.name}!
             </h1>
-            <p className="text-gray-300 text-lg">
-              Continue your journey to N8n mastery
+            <p className="text-slate-300 text-lg">
+              Continue your journey to n8n mastery
             </p>
           </div>
 
@@ -188,23 +200,41 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+      {/* Ambient Background Effects */}
+      <div className="absolute inset-0">
+        {/* Primary ambient glow */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-violet-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+        
+        {/* Subtle grid pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.02]" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(147, 51, 234, 0.3) 1px, transparent 0)`,
+          backgroundSize: '24px 24px'
+        }}></div>
+        
+        {/* Gradient mesh overlay */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/10 via-transparent to-indigo-900/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-bl from-violet-900/5 via-transparent to-purple-900/5"></div>
+      </div>
+      
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 relative z-10">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-br from-white via-purple-50 to-violet-100 bg-clip-text text-transparent mb-2">
             Welcome back, {session.user?.name}!
           </h1>
-          <p className="text-gray-300 text-lg">
-            Continue your journey to N8n mastery
-          </p>
+            <p className="text-slate-300 text-lg">
+              Continue your journey to n8n mastery
+            </p>
         </div>
 
         <ProgressOverview userProgress={userProgress} modules={modules} />
 
         <div className="mt-12">
-          <h2 className="text-2xl font-bold text-white mb-6">Course Modules</h2>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-50 to-violet-100 bg-clip-text text-transparent mb-6">Course Modules</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {modules.map((module, index) => {
               // Get progress for lessons in this module (lesson records have module_id = null)
@@ -227,34 +257,23 @@ export default function Dashboard() {
 
         {/* Additional Resources Section */}
         <div className="mt-16">
-          <h2 className="text-2xl font-bold text-white mb-6">Additional Resources</h2>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-            <div className="space-y-2">
-              <a
-                href="https://www.youtube.com/watch?v=example1"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-blue-300 hover:text-blue-200 underline text-sm transition-colors duration-200"
-              >
-                Getting Started with N8n
-              </a>
-              <a
-                href="https://www.youtube.com/watch?v=example2"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-blue-300 hover:text-blue-200 underline text-sm transition-colors duration-200"
-              >
-                Advanced N8n Workflows
-              </a>
-              <a
-                href="https://www.youtube.com/watch?v=example3"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-blue-300 hover:text-blue-200 underline text-sm transition-colors duration-200"
-              >
-                N8n Integration Patterns
-              </a>
-            </div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-50 to-violet-100 bg-clip-text text-transparent mb-6">Additional Resources</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ResourceCard
+              title="Getting Started with N8n"
+              description="A comprehensive introduction to N8n automation platform, covering the basics and fundamental concepts you need to know."
+              videoUrl="https://www.youtube.com/watch?v=example1"
+            />
+            <ResourceCard
+              title="Advanced N8n Workflows"
+              description="Learn how to create complex automation workflows using advanced N8n features and best practices."
+              videoUrl="https://www.youtube.com/watch?v=example2"
+            />
+            <ResourceCard
+              title="N8n Integration Patterns"
+              description="Discover common integration patterns and how to connect N8n with various services and APIs effectively."
+              videoUrl="https://www.youtube.com/watch?v=example3"
+            />
           </div>
         </div>
       </main>

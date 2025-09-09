@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { requireSupabaseAdmin } from '@/lib/supabase'
 import { DatabaseService } from '@/lib/database'
-import { discordBot } from '@/lib/discord-bot'
 import { authOptions } from '../auth/[...nextauth]/route'
 
 export async function POST(request: NextRequest) {
@@ -179,11 +178,17 @@ export async function POST(request: NextRequest) {
     moduleTitle = lesson?.modules?.title || 'Unknown Module'
 
     // Send Discord notification (only for new completions)
-    await discordBot.sendProgressNotification(user.id, type, itemTitle, moduleTitle)
+    try {
+      const { discordBot } = await import('@/lib/discord-bot')
+      await discordBot.sendProgressNotification(user.id, type, itemTitle, moduleTitle)
 
-    // Check for role assignments if it's a project completion (module completion)
-    if (type === 'project') {
-      await discordBot.checkAndAssignRoles(user.id)
+      // Check for role assignments if it's a project completion (module completion)
+      if (type === 'project') {
+        await discordBot.checkAndAssignRoles(user.id)
+      }
+    } catch (error) {
+      console.error('Discord bot error:', error)
+      // Continue without Discord functionality if it fails
     }
 
     // Create achievement record (only if user_achievements table exists)

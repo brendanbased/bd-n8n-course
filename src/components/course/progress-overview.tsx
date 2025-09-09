@@ -67,25 +67,29 @@ export function ProgressOverview({ userProgress, modules }: ProgressOverviewProp
       icon: Target,
       label: 'Overall Progress',
       value: `${Math.round(stats.overallProgress)}%`,
-      color: 'from-purple-500 to-pink-500',
+      color: 'bg-purple-500',
+      shadowColor: 'shadow-purple-500/25',
     },
     {
       icon: Trophy,
       label: 'Modules Completed',
       value: `${stats.completedModules}/${stats.totalModules}`,
-      color: 'from-blue-500 to-cyan-500',
+      color: 'bg-amber-500',
+      shadowColor: 'shadow-amber-500/25',
     },
     {
       icon: Star,
       label: 'Lessons Completed',
       value: `${stats.completedLessons}/${stats.totalLessons}`,
-      color: 'from-green-500 to-emerald-500',
+      color: 'bg-emerald-500',
+      shadowColor: 'shadow-emerald-500/25',
     },
     {
       icon: Clock,
       label: 'Projects Completed',
       value: `${stats.completedProjects}/${stats.totalProjects}`,
-      color: 'from-orange-500 to-red-500',
+      color: 'bg-violet-500',
+      shadowColor: 'shadow-violet-500/25',
     },
   ]
 
@@ -96,16 +100,24 @@ export function ProgressOverview({ userProgress, modules }: ProgressOverviewProp
         return (
           <div
             key={index}
-            className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20"
+            className="bg-slate-900/30 backdrop-blur-xl rounded-xl p-6 border border-purple-500/20 relative overflow-hidden group hover:bg-slate-800/40 hover:border-purple-400/30 transition-all duration-300"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center`}>
-                <Icon className="w-6 h-6 text-white" />
+            {/* Card ambient effects */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-indigo-500/5 rounded-xl"></div>
+            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center shadow-lg ${stat.shadowColor} relative overflow-hidden`}>
+                  {/* Icon container inner effects */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent rounded-lg"></div>
+                  <Icon className="w-6 h-6 text-white relative z-10" />
+                </div>
               </div>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white mb-1">{stat.value}</p>
-              <p className="text-gray-300 text-sm">{stat.label}</p>
+              <div>
+                <p className="text-2xl font-bold bg-gradient-to-r from-white via-purple-50 to-violet-100 bg-clip-text text-transparent mb-1">{stat.value}</p>
+                <p className="text-slate-300 text-sm">{stat.label}</p>
+              </div>
             </div>
           </div>
         )
