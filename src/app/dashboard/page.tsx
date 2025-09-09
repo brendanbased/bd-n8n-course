@@ -224,6 +224,39 @@ export default function Dashboard() {
             })}
           </div>
         </div>
+
+        {/* Additional Resources Section */}
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold text-white mb-6">Additional Resources</h2>
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
+            <div className="space-y-2">
+              <a
+                href="https://www.youtube.com/watch?v=example1"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-blue-300 hover:text-blue-200 underline text-sm transition-colors duration-200"
+              >
+                Getting Started with N8n
+              </a>
+              <a
+                href="https://www.youtube.com/watch?v=example2"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-blue-300 hover:text-blue-200 underline text-sm transition-colors duration-200"
+              >
+                Advanced N8n Workflows
+              </a>
+              <a
+                href="https://www.youtube.com/watch?v=example3"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-blue-300 hover:text-blue-200 underline text-sm transition-colors duration-200"
+              >
+                N8n Integration Patterns
+              </a>
+            </div>
+          </div>
+        </div>
       </main>
       
       <DeveloperReset onReset={fetchData} />
