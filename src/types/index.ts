@@ -24,6 +24,8 @@ export interface Lesson {
   description: string
   content?: string
   video_url?: string
+  youtube_urls?: string[]
+  video_titles?: string[]
   order: number
   is_locked: boolean
   created_at: string
@@ -36,6 +38,8 @@ export interface Project {
   description: string
   requirements: string[]
   video_url?: string
+  youtube_urls?: string[]
+  video_titles?: string[]
   is_locked: boolean
   created_at: string
 }

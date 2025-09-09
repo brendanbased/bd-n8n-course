@@ -260,19 +260,19 @@ export default function Dashboard() {
           <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-50 to-violet-100 bg-clip-text text-transparent mb-6">Additional Resources</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <ResourceCard
-              title="Getting Started with N8n"
-              description="A comprehensive introduction to N8n automation platform, covering the basics and fundamental concepts you need to know."
-              videoUrl="https://www.youtube.com/watch?v=example1"
+              title="Master N8N in 2 Hours"
+              description="A comprehensive beginner's guide that takes you from novice to proficient in n8n, covering essential concepts, triggers, actions, and building AI agents."
+              videoUrl="https://www.youtube.com/watch?v=AURnISajubk"
             />
             <ResourceCard
-              title="Advanced N8n Workflows"
-              description="Learn how to create complex automation workflows using advanced N8n features and best practices."
-              videoUrl="https://www.youtube.com/watch?v=example2"
+              title="N8N Full Course 8 Hours"
+              description="An in-depth 8-hour course teaching you how to build and sell AI-powered automations using n8n, with step-by-step instructions and real-world applications."
+              videoUrl="https://www.youtube.com/watch?v=2GZ2SNXWK-c"
             />
             <ResourceCard
-              title="N8n Integration Patterns"
-              description="Discover common integration patterns and how to connect N8n with various services and APIs effectively."
-              videoUrl="https://www.youtube.com/watch?v=example3"
+              title="Build Your Own AI SaaS"
+              description="Learn to develop and sell AI agents and automations that solve business problems, focusing on practical implementation and monetization strategies."
+              videoUrl="https://www.youtube.com/watch?v=TLpGkllBpl4"
             />
           </div>
         </div>

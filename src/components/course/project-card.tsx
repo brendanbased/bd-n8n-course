@@ -11,6 +11,7 @@ interface ProjectCardProps {
     requirements: string[]
     video_url?: string
     youtube_urls?: string[]
+    video_titles?: string[]
   }
   moduleId: string
   isLocked: boolean
@@ -122,21 +123,48 @@ export function ProjectCard({ project, moduleId, isLocked, isCompleted, onComple
                   {project.youtube_urls.length === 1 ? 'Project Resource' : 'Project Resources'}
                 </h4>
                 <div className="space-y-2">
-                  {project.youtube_urls.map((url, index) => (
-                    <a
-                      key={index}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-blue-300 hover:text-blue-200 underline text-sm transition-colors duration-200"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {project.youtube_urls.length === 1 
-                        ? `${project.title} - Video` 
-                        : `${project.title} - Video ${index + 1}`
+                  {project.youtube_urls.map((url, index) => {
+                    // INDIVIDUAL PROJECT VIDEO TITLES - Map each video URL to its own custom title
+                    const getIndividualProjectVideoTitle = (videoUrl: string, projectTitle: string, videoIndex: number) => {
+                      // Map each individual project video URL to its custom title
+                      const individualProjectVideoTitles: { [videoUrl: string]: string } = {
+                        'https://youtube.com/watch?v=4cQWJViybAQ&t=70s': 'n8n Quick Start Tutorial',
+                        'https://youtube.com/watch?v=l8NoMgd8lG4': 'The Best Way to Give AI Agents Tools in n8n',
+                        'https://youtube.com/watch?v=R36bpNPPIMs': 'How to Build a Google Scraping AI Agent with n8n',
+                        'https://youtube.com/watch?v=F1psr8uFwUU': 'Locally Host n8n AI Agents for Free',
+                        'https://youtube.com/watch?v=DcEMf2K6cPQ': 'Local n8n AI Agents in 5 Minutes',
+                        'https://youtube.com/watch?v=vUnG7hsPe5E': 'How to Build an AI Agent for Data Analysis, Visualization, and Reporting',
+                        'https://youtube.com/watch?v=HNKlFTd1maM': 'How I Sold These 4 AI Agents for $23,000',
+                        'https://youtube.com/watch?v=Ey18PDiaAYI&t=13s': 'Build & Sell n8n AI Agents',
+                        // Every video gets its own unique title!
+                      };
+                      
+                      // Return custom title if exists, otherwise fallback to default
+                      if (individualProjectVideoTitles[videoUrl]) {
+                        return individualProjectVideoTitles[videoUrl];
                       }
-                    </a>
-                  ))}
+                      
+                      // Fallback to default format if no custom title found
+                      return project.youtube_urls && project.youtube_urls.length === 1 
+                        ? `${projectTitle} - Video` 
+                        : `${projectTitle} - Video ${videoIndex + 1}`;
+                    };
+                    
+                    const videoTitle = getIndividualProjectVideoTitle(url, project.title, index);
+                    
+                    return (
+                      <a
+                        key={index}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-blue-300 hover:text-blue-200 underline text-sm transition-colors duration-200"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {videoTitle}
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
             ) : (

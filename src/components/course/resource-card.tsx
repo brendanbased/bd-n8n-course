@@ -12,6 +12,28 @@ interface ResourceCardProps {
 export function ResourceCard({ title, description, videoUrl }: ResourceCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
+  // Get custom video title for resource cards
+  const getCustomResourceVideoTitle = (videoUrl: string, cardTitle: string) => {
+    // Map each individual resource video URL to its custom title
+    const individualResourceVideoTitles: { [videoUrl: string]: string } = {
+      // RESOURCE VIDEO TITLES - Add your custom titles here
+      'https://www.youtube.com/watch?v=AURnISajubk': 'Master n8n in 2 Hours',
+      'https://www.youtube.com/watch?v=2GZ2SNXWK-c': 'n8n Full Course 8 Hours',
+      'https://www.youtube.com/watch?v=TLpGkllBpl4': 'Build Your Own AI SaaS with ZERO Coding',
+      
+      // ADD MORE RESOURCE VIDEO URLS AND TITLES HERE...
+      // Just copy each YouTube URL and give it a custom name
+    };
+    
+    // Return custom title if exists, otherwise fallback to default
+    if (individualResourceVideoTitles[videoUrl]) {
+      return individualResourceVideoTitles[videoUrl];
+    }
+    
+    // Fallback to default format if no custom title found
+    return `${cardTitle} - Resource Video`;
+  }
+
   return (
     <div className="bg-slate-900/30 backdrop-blur-xl rounded-xl border border-purple-500/20 transition-all duration-300 relative overflow-hidden group hover:bg-slate-800/40 hover:border-purple-400/30">
       {/* Card ambient effects */}
@@ -60,7 +82,7 @@ export function ResourceCard({ title, description, videoUrl }: ResourceCardProps
               rel="noopener noreferrer"
               className="block text-purple-300 hover:text-purple-200 underline text-sm transition-colors duration-200 hover:bg-purple-500/10 p-2 rounded-lg"
             >
-              Watch Video - Placeholder Title
+              {getCustomResourceVideoTitle(videoUrl, title)}
             </a>
           </div>
         </div>

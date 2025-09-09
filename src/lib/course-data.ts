@@ -45,6 +45,7 @@ export class CourseDataService {
             description: lesson.objective || '',
             video_url: lesson.youtube_urls && lesson.youtube_urls.length > 0 ? lesson.youtube_urls[0] : lesson.video_url,
             youtube_urls: lesson.youtube_urls || (lesson.video_url ? [lesson.video_url] : []),
+            video_titles: lesson.video_titles,
             is_locked: false // Field doesn't exist in database
           })),
           project: projectLesson ? {
@@ -52,6 +53,7 @@ export class CourseDataService {
             description: projectLesson.objective || '',
             video_url: projectLesson.youtube_urls && projectLesson.youtube_urls.length > 0 ? projectLesson.youtube_urls[0] : projectLesson.video_url,
             youtube_urls: projectLesson.youtube_urls || (projectLesson.video_url ? [projectLesson.video_url] : []),
+            video_titles: projectLesson.video_titles,
             requirements: [], // Field doesn't exist in database
             is_locked: false // Field doesn't exist in database
           } : null
@@ -105,6 +107,7 @@ export class CourseDataService {
           description: lesson.objective || '',
           video_url: lesson.youtube_urls && lesson.youtube_urls.length > 0 ? lesson.youtube_urls[0] : lesson.video_url,
           youtube_urls: lesson.youtube_urls || (lesson.video_url ? [lesson.video_url] : []),
+          video_titles: lesson.video_titles,
           is_locked: false // Field doesn't exist in database
         })),
         project: projectLesson ? {
@@ -112,6 +115,7 @@ export class CourseDataService {
           description: projectLesson.objective || '',
           video_url: projectLesson.youtube_urls && projectLesson.youtube_urls.length > 0 ? projectLesson.youtube_urls[0] : projectLesson.video_url,
           youtube_urls: projectLesson.youtube_urls || (projectLesson.video_url ? [projectLesson.video_url] : []),
+          video_titles: projectLesson.video_titles,
           requirements: [], // Field doesn't exist in database
           is_locked: false // Field doesn't exist in database
         } : null

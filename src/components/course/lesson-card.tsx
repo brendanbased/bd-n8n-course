@@ -11,6 +11,7 @@ interface LessonCardProps {
     order: number
     video_url?: string
     youtube_urls?: string[]
+    video_titles?: string[]
   }
   moduleId: string
   isLocked: boolean
@@ -121,21 +122,70 @@ export function LessonCard({ lesson, moduleId, isLocked, isCompleted, onComplete
                   {lesson.youtube_urls.length === 1 ? 'Video Resource' : 'Video Resources'}
                 </h4>
                 <div className="space-y-2">
-                  {lesson.youtube_urls.map((url, index) => (
-                    <a
-                      key={index}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-blue-300 hover:text-blue-200 underline text-sm transition-colors duration-200"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {lesson.youtube_urls.length === 1 
-                        ? `${lesson.title} - Video` 
-                        : `${lesson.title} - Video ${index + 1}`
+                  {lesson.youtube_urls.map((url, index) => {
+                    // INDIVIDUAL VIDEO TITLES - Map each video URL to its own custom title
+                    const getIndividualVideoTitle = (videoUrl: string, lessonTitle: string, videoIndex: number) => {
+                      // Map each individual video URL to its custom title
+                      const individualVideoTitles: { [videoUrl: string]: string } = {
+                        'https://youtube.com/watch?v=otUBuV1foLY': 'Build your first NO CODE AI Agent in n8n',
+                        'https://youtube.com/watch?v=lK3veuZAg0c': 'Step-by-Step: N8N Webhooks',
+                        'https://youtube.com/watch?v=3FfCRbq3XMs': 'n8n Webhook Security',
+                        'https://youtube.com/watch?v=tNHVxZ2qvII': 'Master n8n JSON & Data Transformation',
+                        'https://youtube.com/watch?v=SAUxo5fcLMs': 'Image Generation API with n8n',
+                        'https://youtube.com/watch?v=8haVekgx_lk': 'Connect n8n to Any LLM',
+                        'https://youtube.com/watch?v=4o0AJYBEiBo': 'Only 1% of n8n Builders Know This Node Exists',
+                        'https://youtube.com/watch?v=wq001sxDTWw': 'Context Engineering Hacks for Smarter No-Code AI Agents',
+                        'https://youtube.com/watch?v=5TuHtDTAe0U': 'n8n Authentication Mastery',
+                        'https://youtube.com/watch?v=PYkjffkLLZ8': 'How to Scrape Websites Without Paid APIs Using n8n',
+                        'https://youtube.com/watch?v=PxQwzoPmP3M': 'Web Scrape Anything Automatically (n8n + Apify)',
+                        'https://youtube.com/watch?v=Ee9WtEEd300': 'Turn Any Website Into LLM Ready Data in Seconds with n8n & Firecrawl',
+                        'https://youtube.com/watch?v=wtvKL5Y2Nhg': 'How to Set Up Supabase & Postgres for RAG Agents with Memory in n8n',
+                        'https://youtube.com/watch?v=R5YHd_C24r4': 'How To Connect MongoDB With n8n',
+                        'https://youtube.com/watch?v=F1psr8uFwUU': 'Locally Host n8n AI Agents for FREE',
+                        'https://youtube.com/watch?v=bTF3tACqPRU': 'One n8n Workflow for Unlimited Error Handling',
+                        'https://youtube.com/watch?v=ndPszMUEBfo': 'A Beginner\'s Guide to Error Handling',
+                        'https://youtube.com/watch?v=IKF7Tv9ZD5A': 'Master n8n Queue Mode',
+                        'https://youtube.com/watch?v=s8WPy819Hm0': 'Scaling N8N: Setting up a Robust Queue System',
+                        'https://youtube.com/watch?v=JjBofKJnYIU': 'How to Set up Supabase and Postgres for RAG Agent with Memory in n8n',
+                        'https://youtube.com/watch?v=JrGwVwBEIOI': 'Build Your Own Private GPT-OSS AI Agent',
+                        'https://youtube.com/watch?v=vUnG7hsPe5E': 'How to Build an AI Agent for Data Analysis, Visualization, and Reporting',
+                        'https://youtube.com/watch?v=9FuNtfsnRNo': 'I Built the Ultimate Team of AI Agents in n8n With No Code',
+                        'https://youtube.com/watch?v=d7hNUFrbJxo': 'How to Version Control your n8n Workflows',
+                        'https://youtube.com/watch?v=aUr9RBXr5Wo': 'Package Your n8n Workflows Into Full Web Apps',
+                        'https://youtube.com/watch?v=EXwNnb6ac7k': 'Turn n8n Workflows Into Full Web Apps',
+                        'https://youtube.com/watch?v=kUpTUEwKnrk': 'Build Anything with Lovable + n8n AI Agents',
+                        'https://youtube.com/watch?v=A7rmXS-3Wc0': 'My Step-by-Step Automation Agency Delivery Process',
+                        'https://youtube.com/watch?v=I7m1bhROmnk': 'How to Price N8N AI Agents & Workflows',
+                        'https://youtube.com/watch?v=MzigW7h_p18': 'How to Create a Subscription in Stripe',
+                        // Every video gets its own unique title!
+                      };
+                      
+                      // Return custom title if exists, otherwise fallback to default
+                      if (individualVideoTitles[videoUrl]) {
+                        return individualVideoTitles[videoUrl];
                       }
-                    </a>
-                  ))}
+                      
+                      // Fallback to default format if no custom title found
+                      return lesson.youtube_urls && lesson.youtube_urls.length === 1 
+                        ? `${lessonTitle} - Video` 
+                        : `${lessonTitle} - Video ${videoIndex + 1}`;
+                    };
+                    
+                    const videoTitle = getIndividualVideoTitle(url, lesson.title, index);
+                    
+                    return (
+                      <a
+                        key={index}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-blue-300 hover:text-blue-200 underline text-sm transition-colors duration-200"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {videoTitle}
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
             ) : (
