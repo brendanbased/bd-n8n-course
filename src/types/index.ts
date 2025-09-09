@@ -1,8 +1,8 @@
 export interface User {
   id: string
   discord_id: string
-  username: string
-  avatar?: string
+  discord_username: string
+  discord_avatar?: string
   email?: string
   created_at: string
   updated_at: string
@@ -45,7 +45,6 @@ export interface UserProgress {
   user_id: string
   module_id?: string
   lesson_id?: string
-  project_id?: string
   completed: boolean
   completed_at?: string
   created_at: string

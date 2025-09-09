@@ -3,12 +3,13 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, use } from 'react'
-import { courseModules } from '@/data/course-structure'
+import { CourseDataService } from '@/lib/course-data'
 import { Navbar } from '@/components/layout/navbar'
 import { LessonCard } from '@/components/course/lesson-card'
 import { ProjectCard } from '@/components/course/project-card'
 import { ArrowLeft, BookOpen, Code } from 'lucide-react'
 import Link from 'next/link'
+import { Module, Lesson, Project, UserProgress } from '@/types'
 
 interface ModulePageProps {
   params: Promise<{
@@ -19,10 +20,12 @@ interface ModulePageProps {
 export default function ModulePage({ params }: ModulePageProps) {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [userProgress, setUserProgress] = useState<any[]>([])
+  const [module, setModule] = useState<(Module & { lessons: Lesson[], project: Project | null }) | null>(null)
+  const [userProgress, setUserProgress] = useState<UserProgress[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   
   const resolvedParams = use(params)
-  const module = courseModules.find(m => m.id === resolvedParams.moduleId)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -32,16 +35,42 @@ export default function ModulePage({ params }: ModulePageProps) {
       return
     }
 
-    if (!module) {
-      router.push('/dashboard')
-      return
+    fetchData()
+  }, [session, status, router, resolvedParams.moduleId])
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Fetch module and user progress in parallel
+      const [moduleData, progressResponse] = await Promise.all([
+        CourseDataService.getModule(resolvedParams.moduleId),
+        fetch('/api/progress')
+      ])
+
+      if (!moduleData) {
+        router.push('/dashboard')
+        return
+      }
+
+      if (!progressResponse.ok) {
+        throw new Error('Failed to fetch progress')
+      }
+
+      const progressData = await progressResponse.json()
+      
+      setModule(moduleData)
+      setUserProgress(progressData.progress || [])
+    } catch (err) {
+      console.error('Error fetching data:', err)
+      setError('Failed to load module data. Please try again.')
+    } finally {
+      setLoading(false)
     }
+  }
 
-    // TODO: Fetch user progress from Supabase
-    setUserProgress([])
-  }, [session, status, router, module])
-
-  if (status === 'loading') {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="text-center">
@@ -56,11 +85,38 @@ export default function ModulePage({ params }: ModulePageProps) {
     return null
   }
 
-  const completedLessons = userProgress.filter(p => p.lesson_id && p.completed).length
-  const completedProjects = userProgress.filter(p => p.project_id && p.completed).length
-  const totalItems = module.lessons.length + 1
-  const completedItems = completedLessons + completedProjects
-  const progressPercentage = (completedItems / totalItems) * 100
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-500/20 border border-red-500 rounded-lg p-6 text-center">
+            <p className="text-white text-lg mb-4">{error}</p>
+            <button
+              onClick={fetchData}
+              className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Count completed regular lessons (not projects)
+  const completedLessons = userProgress.filter(p => 
+    p.lesson_id && p.completed && 
+    module.lessons.some(lesson => lesson.id === p.lesson_id)
+  ).length
+  
+  // Check if project is completed (project is a lesson with order_index 4)
+  const projectCompleted = module.project ? 
+    userProgress.some(p => p.lesson_id === module.project?.id && p.completed) : false
+  
+  const totalItems = module.lessons.length + (module.project ? 1 : 0)
+  const completedItems = completedLessons + (projectCompleted ? 1 : 0)
+  const progressPercentage = totalItems > 0 ? (completedItems / totalItems) * 100 : 0
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
@@ -86,10 +142,12 @@ export default function ModulePage({ params }: ModulePageProps) {
                     <BookOpen className="w-4 h-4" />
                     <span>{module.lessons.length} Lessons</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Code className="w-4 h-4" />
-                    <span>1 Project</span>
-                  </div>
+                  {module.project && (
+                    <div className="flex items-center space-x-2">
+                      <Code className="w-4 h-4" />
+                      <span>1 Project</span>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="text-right">
@@ -121,7 +179,7 @@ export default function ModulePage({ params }: ModulePageProps) {
                 key={lesson.id}
                 lesson={lesson}
                 moduleId={module.id}
-                isLocked={false}
+                isLocked={lesson.is_locked}
                 isCompleted={userProgress.some(p => p.lesson_id === lesson.id && p.completed)}
               />
             ))}
@@ -129,15 +187,17 @@ export default function ModulePage({ params }: ModulePageProps) {
         </div>
 
         {/* Project */}
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-6">Module Project</h2>
-          <ProjectCard
-            project={module.project}
-            moduleId={module.id}
-            isLocked={false}
-            isCompleted={userProgress.some(p => p.project_id === module.project.id && p.completed)}
-          />
-        </div>
+        {module.project && (
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-6">Module Project</h2>
+            <ProjectCard
+              project={module.project}
+              moduleId={module.id}
+              isLocked={module.project.is_locked}
+              isCompleted={userProgress.some(p => p.lesson_id === module.project?.id && p.completed)}
+            />
+          </div>
+        )}
       </main>
     </div>
   )

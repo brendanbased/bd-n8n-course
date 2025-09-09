@@ -85,7 +85,7 @@ export function ModuleCard({ module, isLocked, progress }: ModuleCardProps) {
             <span>1 Project</span>
           </div>
           <span className="text-xs text-gray-400">
-            {progress.filter(p => p.project_id && p.completed).length}/1
+            {module.project && progress.some(p => p.lesson_id === module.project?.id && p.completed) ? 1 : 0}/1
           </span>
         </div>
       </div>

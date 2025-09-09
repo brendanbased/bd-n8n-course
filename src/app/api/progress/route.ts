@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { supabaseAdmin } from '@/lib/supabase'
+import { requireSupabaseAdmin } from '@/lib/supabase'
+import { DatabaseService } from '@/lib/database'
 import { discordBot } from '@/lib/discord-bot'
+import { authOptions } from '../auth/[...nextauth]/route'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const supabaseAdmin = requireSupabaseAdmin()
+    
+    const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -35,10 +39,9 @@ export async function POST(request: NextRequest) {
       completed_at: new Date().toISOString(),
     }
 
-    if (type === 'lesson') {
+    if (type === 'lesson' || type === 'project') {
+      // Both lessons and projects are stored in the lessons table, so use lesson_id
       progressData.lesson_id = itemId
-    } else if (type === 'project') {
-      progressData.project_id = itemId
     } else {
       return NextResponse.json({ error: 'Invalid progress type' }, { status: 400 })
     }
@@ -47,7 +50,7 @@ export async function POST(request: NextRequest) {
     const { error: progressError } = await supabaseAdmin
       .from('user_progress')
       .upsert(progressData, {
-        onConflict: type === 'lesson' ? 'user_id,lesson_id' : 'user_id,project_id'
+        onConflict: 'user_id,lesson_id'
       })
 
     if (progressError) {
@@ -59,25 +62,15 @@ export async function POST(request: NextRequest) {
     let itemTitle = ''
     let moduleTitle = ''
 
-    if (type === 'lesson') {
-      const { data: lesson } = await supabaseAdmin
-        .from('lessons')
-        .select('title, modules(title)')
-        .eq('id', itemId)
-        .single()
-      
-      itemTitle = lesson?.title || 'Unknown Lesson'
-      moduleTitle = lesson?.modules?.title || 'Unknown Module'
-    } else {
-      const { data: project } = await supabaseAdmin
-        .from('projects')
-        .select('title, modules(title)')
-        .eq('id', itemId)
-        .single()
-      
-      itemTitle = project?.title || 'Unknown Project'
-      moduleTitle = project?.modules?.title || 'Unknown Module'
-    }
+    // Both lessons and projects are in the lessons table
+    const { data: lesson } = await supabaseAdmin
+      .from('lessons')
+      .select('title, modules(title)')
+      .eq('id', itemId)
+      .single()
+    
+    itemTitle = lesson?.title || `Unknown ${type}`
+    moduleTitle = lesson?.modules?.title || 'Unknown Module'
 
     // Send Discord notification
     await discordBot.sendProgressNotification(user.id, type, itemTitle, moduleTitle)
@@ -109,35 +102,34 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
+    
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get user from database
-    const { data: user } = await supabaseAdmin
-      .from('users')
-      .select('id')
-      .eq('discord_id', session.user.id)
-      .single()
+    // Get user from database using database service
+    let user = await DatabaseService.getUserByDiscordId(session.user.id)
 
+    // If user doesn't exist, create them
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      try {
+        user = await DatabaseService.createUser({
+          discord_id: session.user.id,
+          discord_username: session.user.name || 'Unknown User',
+          discord_avatar: session.user.image || undefined,
+          email: session.user.email || undefined,
+        })
+      } catch (createError) {
+        console.error('Failed to create user:', createError)
+        return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
+      }
     }
 
-    // Get user progress
-    const { data: progress, error } = await supabaseAdmin
-      .from('user_progress')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('completed', true)
+    // Get user progress using database service
+    const progress = await DatabaseService.getUserProgress(user.id)
 
-    if (error) {
-      console.error('Progress fetch error:', error)
-      return NextResponse.json({ error: 'Failed to fetch progress' }, { status: 500 })
-    }
-
-    return NextResponse.json({ progress: progress || [] })
+    return NextResponse.json({ progress })
   } catch (error) {
     console.error('Progress API error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -51,7 +51,7 @@ class DiscordBot {
       // Get user data from Supabase
       const { data: user } = await supabaseAdmin
         .from('users')
-        .select('username, discord_id')
+        .select('discord_username, discord_id')
         .eq('id', userId)
         .single()
 
@@ -107,15 +107,15 @@ class DiscordBot {
 
       if (!user) return
 
-      // Get completed modules count
-      const { data: completedModules } = await supabaseAdmin
+      // Get completed projects (lessons with order_index 4) to determine module completion
+      const { data: completedProjects } = await supabaseAdmin
         .from('user_progress')
-        .select('module_id')
+        .select('module_id, lessons!inner(order_index)')
         .eq('user_id', userId)
         .eq('completed', true)
-        .not('project_id', 'is', null) // Only count module completion when project is done
+        .eq('lessons.order_index', 4) // Only count module completion when project is done
 
-      const completedModulesCount = completedModules?.length || 0
+      const completedModulesCount = completedProjects?.length || 0
 
       // Get available roles
       const { data: roles } = await supabaseAdmin

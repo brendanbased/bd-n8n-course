@@ -42,7 +42,7 @@ export function ProjectCard({ project, moduleId, isLocked, isCompleted }: Projec
             <div className="flex items-center space-x-3 mb-2">
               <h3 className="text-xl font-semibold text-white">{project.title}</h3>
               <span className="text-xs bg-orange-500/20 text-orange-300 px-2 py-1 rounded-full">
-                Capstone Project
+                Project
               </span>
             </div>
             <p className="text-gray-300 mb-4">{project.description}</p>
