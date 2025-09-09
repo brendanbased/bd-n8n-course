@@ -4,6 +4,40 @@ import { requireSupabaseAdmin } from '@/lib/supabase'
 import { DatabaseService } from '@/lib/database'
 import { authOptions } from '../auth/[...nextauth]/route'
 
+// Helper function to check if a module is completed
+async function checkModuleCompletion(userId: string, moduleId: string, supabaseAdmin: any): Promise<boolean> {
+  try {
+    // Get all lessons in the module
+    const { data: moduleLessons } = await supabaseAdmin
+      .from('lessons')
+      .select('id, order_index')
+      .eq('module_id', moduleId)
+      .order('order_index')
+
+    if (!moduleLessons || moduleLessons.length === 0) return false
+
+    // Get user's completed lessons for this module
+    const { data: completedLessons } = await supabaseAdmin
+      .from('user_progress')
+      .select('lesson_id')
+      .eq('user_id', userId)
+      .eq('completed', true)
+      .in('lesson_id', moduleLessons.map(l => l.id))
+
+    const completedLessonIds = completedLessons?.map(p => p.lesson_id) || []
+
+    // Check if all lessons are completed
+    const allLessonsCompleted = moduleLessons.every(lesson => 
+      completedLessonIds.includes(lesson.id)
+    )
+
+    return allLessonsCompleted
+  } catch (error) {
+    console.error('Error checking module completion:', error)
+    return false
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabaseAdmin = requireSupabaseAdmin()
@@ -177,14 +211,28 @@ export async function POST(request: NextRequest) {
     itemTitle = lesson?.title || `Unknown ${type}`
     moduleTitle = lesson?.modules?.title || 'Unknown Module'
 
-    // Send Discord notification (only for new completions)
+    // Check if module is now completed and send Discord notifications
     try {
       const { discordBot } = await import('@/lib/discord-bot')
-      await discordBot.sendProgressNotification(user.id, type, itemTitle, moduleTitle)
-
-      // Check for role assignments if it's a project completion (module completion)
-      if (type === 'project') {
-        await discordBot.checkAndAssignRoles(user.id)
+      
+      // Check if this completion resulted in a completed module
+      const moduleCompleted = await checkModuleCompletion(user.id, moduleId, supabaseAdmin)
+      
+      if (moduleCompleted) {
+        // Get module details for notification
+        const { data: module } = await supabaseAdmin
+          .from('modules')
+          .select('title, order_index')
+          .eq('id', moduleId)
+          .single()
+        
+        if (module) {
+          // Send module completion notification
+          await discordBot.sendModuleCompletionNotification(user.id, module.title, module.order_index)
+          
+          // Check for role promotion based on module number
+          await discordBot.checkAndAssignRoles(user.id, module.order_index)
+        }
       }
     } catch (error) {
       console.error('Discord bot error:', error)

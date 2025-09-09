@@ -41,7 +41,7 @@ class DiscordBot {
     }
   }
 
-  async sendProgressNotification(userId: string, type: 'lesson' | 'project' | 'module', itemTitle: string, moduleTitle: string) {
+  async sendModuleCompletionNotification(userId: string, moduleTitle: string, moduleNumber: number) {
     if (!this.isReady || !process.env.DISCORD_NOTIFICATION_CHANNEL_ID) {
       console.warn('Discord bot not ready or notification channel not configured')
       return
@@ -56,7 +56,7 @@ class DiscordBot {
         .single()
 
       if (!user) {
-        console.error('User not found for progress notification')
+        console.error('User not found for module completion notification')
         return
       }
 
@@ -67,13 +67,13 @@ class DiscordBot {
       }
 
       const embed = new EmbedBuilder()
-        .setColor(this.getColorForType(type))
-        .setTitle('🎉 Progress Update!')
-        .setDescription(`<@${user.discord_id}> just completed **${itemTitle}** in ${moduleTitle}!`)
+        .setColor(0x10B981) // Green color for module completion
+        .setTitle('🎯 Module Completed!')
+        .setDescription(`<@${user.discord_id}> just completed **${moduleTitle}**!`)
         .addFields([
           {
             name: 'Achievement',
-            value: `${this.getEmojiForType(type)} ${type.charAt(0).toUpperCase() + type.slice(1)} Completed`,
+            value: `🎯 Module ${moduleNumber} Completed`,
             inline: true,
           },
           {
@@ -87,18 +87,18 @@ class DiscordBot {
 
       await channel.send({ embeds: [embed] })
     } catch (error) {
-      console.error('Failed to send progress notification:', error)
+      console.error('Failed to send module completion notification:', error)
     }
   }
 
-  async checkAndAssignRoles(userId: string) {
+  async checkAndAssignRoles(userId: string, completedModuleNumber: number) {
     if (!this.isReady || !process.env.DISCORD_GUILD_ID) {
       console.warn('Discord bot not ready or guild ID not configured')
       return
     }
 
     try {
-      // Get user data and progress
+      // Get user data
       const { data: user } = await supabaseAdmin
         .from('users')
         .select('discord_id')
@@ -107,24 +107,19 @@ class DiscordBot {
 
       if (!user) return
 
-      // Get completed projects (lessons with order_index 4) to determine module completion
-      const { data: completedProjects } = await supabaseAdmin
-        .from('user_progress')
-        .select('module_id, lessons!inner(order_index)')
-        .eq('user_id', userId)
-        .eq('completed', true)
-        .eq('lessons.order_index', 4) // Only count module completion when project is done
+      // Define role mappings based on module completion
+      const roleMapping = {
+        1: { name: 'Builder', roleId: process.env.DISCORD_BUILDER_ROLE_ID },
+        3: { name: 'Operator', roleId: process.env.DISCORD_OPERATOR_ROLE_ID },
+        6: { name: 'Architect', roleId: process.env.DISCORD_ARCHITECT_ROLE_ID }
+      }
 
-      const completedModulesCount = completedProjects?.length || 0
-
-      // Get available roles
-      const { data: roles } = await supabaseAdmin
-        .from('discord_roles')
-        .select('*')
-        .lte('module_completion_required', completedModulesCount)
-        .order('module_completion_required', { ascending: false })
-
-      if (!roles || roles.length === 0) return
+      // Check if this module completion triggers a role promotion
+      const rolePromotion = roleMapping[completedModuleNumber as keyof typeof roleMapping]
+      if (!rolePromotion || !rolePromotion.roleId) {
+        console.log(`No role promotion for module ${completedModuleNumber}`)
+        return
+      }
 
       const guild = this.client.guilds.cache.get(process.env.DISCORD_GUILD_ID)
       if (!guild) return
@@ -132,23 +127,30 @@ class DiscordBot {
       const member = await guild.members.fetch(user.discord_id)
       if (!member) return
 
-      // Assign the highest role they qualify for
-      const highestRole = roles[0]
-      const discordRole = guild.roles.cache.get(highestRole.discord_role_id)
+      const discordRole = guild.roles.cache.get(rolePromotion.roleId)
       
       if (discordRole && !member.roles.cache.has(discordRole.id)) {
+        // Remove previous course roles before adding new one
+        const allCourseRoleIds = Object.values(roleMapping).map(r => r.roleId).filter(Boolean)
+        const currentCourseRoles = member.roles.cache.filter(role => allCourseRoleIds.includes(role.id))
+        
+        if (currentCourseRoles.size > 0) {
+          await member.roles.remove(currentCourseRoles)
+        }
+
+        // Add the new role
         await member.roles.add(discordRole)
-        console.log(`Assigned role ${highestRole.name} to user ${user.discord_id}`)
+        console.log(`Assigned role ${rolePromotion.name} to user ${user.discord_id}`)
         
         // Send role assignment notification
-        await this.sendRoleNotification(user.discord_id, highestRole.name, completedModulesCount)
+        await this.sendRoleNotification(user.discord_id, rolePromotion.name, completedModuleNumber)
       }
     } catch (error) {
       console.error('Failed to check and assign roles:', error)
     }
   }
 
-  private async sendRoleNotification(discordId: string, roleName: string, modulesCompleted: number) {
+  private async sendRoleNotification(discordId: string, roleName: string, completedModuleNumber: number) {
     if (!process.env.DISCORD_NOTIFICATION_CHANNEL_ID) return
 
     try {
@@ -161,8 +163,8 @@ class DiscordBot {
         .setDescription(`<@${discordId}> has been promoted to **${roleName}**!`)
         .addFields([
           {
-            name: 'Modules Completed',
-            value: `${modulesCompleted}/6`,
+            name: 'Module Completed',
+            value: `Module ${completedModuleNumber}`,
             inline: true,
           },
           {
@@ -180,31 +182,6 @@ class DiscordBot {
     }
   }
 
-  private getColorForType(type: 'lesson' | 'project' | 'module'): number {
-    switch (type) {
-      case 'lesson':
-        return 0x3B82F6 // Blue
-      case 'project':
-        return 0xF59E0B // Orange
-      case 'module':
-        return 0x10B981 // Green
-      default:
-        return 0x8B5CF6 // Purple
-    }
-  }
-
-  private getEmojiForType(type: 'lesson' | 'project' | 'module'): string {
-    switch (type) {
-      case 'lesson':
-        return '📚'
-      case 'project':
-        return '🚀'
-      case 'module':
-        return '🎯'
-      default:
-        return '✅'
-    }
-  }
 
   async destroy() {
     if (this.client) {
