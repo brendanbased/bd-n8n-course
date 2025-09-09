@@ -168,6 +168,8 @@ export class DataTransformer {
         title: lesson.title,
         description: lesson.objective,
         order: lesson.order_index,
+        video_url: lesson.youtube_urls && lesson.youtube_urls.length > 0 ? lesson.youtube_urls[0] : lesson.video_url,
+        youtube_urls: lesson.youtube_urls || (lesson.video_url ? [lesson.video_url] : []),
         is_locked: false, // Not in your database
         created_at: lesson.created_at
       })),
@@ -176,6 +178,8 @@ export class DataTransformer {
         module_id: projectLesson.module_id,
         title: projectLesson.title,
         description: projectLesson.objective,
+        video_url: projectLesson.youtube_urls && projectLesson.youtube_urls.length > 0 ? projectLesson.youtube_urls[0] : projectLesson.video_url,
+        youtube_urls: projectLesson.youtube_urls || (projectLesson.video_url ? [projectLesson.video_url] : []),
         requirements: [], // Not in your database
         is_locked: false, // Not in your database
         created_at: projectLesson.created_at

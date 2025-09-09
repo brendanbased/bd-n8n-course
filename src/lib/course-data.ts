@@ -25,9 +25,15 @@ export class CourseDataService {
       return modules.map(module => {
         const moduleLessons = allLessons.filter(lesson => lesson.module_id === module.id)
         
-        // Separate regular lessons from projects (projects have order_index 4)
-        const lessons = moduleLessons.filter(lesson => lesson.order_index < 4)
-        const projectLesson = moduleLessons.find(lesson => lesson.order_index === 4)
+        // Find project lesson first (look for lessons with "project" in title or order_index >= 4)
+        let projectLesson = moduleLessons.find(lesson => 
+          lesson.order_index === 4 || 
+          lesson.title.toLowerCase().includes('project') ||
+          lesson.order_index === Math.max(...moduleLessons.map(l => l.order_index))
+        )
+        
+        // Regular lessons are everything except the project
+        const lessons = moduleLessons.filter(lesson => lesson.id !== projectLesson?.id)
         
         return {
           ...module,
@@ -37,11 +43,15 @@ export class CourseDataService {
             ...lesson,
             order: lesson.order_index,
             description: lesson.objective || '',
+            video_url: lesson.youtube_urls && lesson.youtube_urls.length > 0 ? lesson.youtube_urls[0] : lesson.video_url,
+            youtube_urls: lesson.youtube_urls || (lesson.video_url ? [lesson.video_url] : []),
             is_locked: false // Field doesn't exist in database
           })),
           project: projectLesson ? {
             ...projectLesson,
             description: projectLesson.objective || '',
+            video_url: projectLesson.youtube_urls && projectLesson.youtube_urls.length > 0 ? projectLesson.youtube_urls[0] : projectLesson.video_url,
+            youtube_urls: projectLesson.youtube_urls || (projectLesson.video_url ? [projectLesson.video_url] : []),
             requirements: [], // Field doesn't exist in database
             is_locked: false // Field doesn't exist in database
           } : null
@@ -75,9 +85,15 @@ export class CourseDataService {
 
       if (lessonsError) throw lessonsError
 
-      // Separate regular lessons from projects
-      const lessons = allLessons.filter(lesson => lesson.order_index < 4)
-      const projectLesson = allLessons.find(lesson => lesson.order_index === 4)
+      // Find project lesson first (look for lessons with "project" in title or order_index >= 4)
+      let projectLesson = allLessons.find(lesson => 
+        lesson.order_index === 4 || 
+        lesson.title.toLowerCase().includes('project') ||
+        lesson.order_index === Math.max(...allLessons.map(l => l.order_index))
+      )
+      
+      // Regular lessons are everything except the project
+      const lessons = allLessons.filter(lesson => lesson.id !== projectLesson?.id)
 
       return {
         ...module,
@@ -87,11 +103,15 @@ export class CourseDataService {
           ...lesson,
           order: lesson.order_index,
           description: lesson.objective || '',
+          video_url: lesson.youtube_urls && lesson.youtube_urls.length > 0 ? lesson.youtube_urls[0] : lesson.video_url,
+          youtube_urls: lesson.youtube_urls || (lesson.video_url ? [lesson.video_url] : []),
           is_locked: false // Field doesn't exist in database
         })),
         project: projectLesson ? {
           ...projectLesson,
           description: projectLesson.objective || '',
+          video_url: projectLesson.youtube_urls && projectLesson.youtube_urls.length > 0 ? projectLesson.youtube_urls[0] : projectLesson.video_url,
+          youtube_urls: projectLesson.youtube_urls || (projectLesson.video_url ? [projectLesson.video_url] : []),
           requirements: [], // Field doesn't exist in database
           is_locked: false // Field doesn't exist in database
         } : null
