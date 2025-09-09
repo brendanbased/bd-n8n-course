@@ -77,7 +77,7 @@ export function ProjectCard({ project, moduleId, isLocked, isCompleted }: Projec
         
         {isLocked ? (
           <div className="px-6 py-3 bg-gray-600 text-gray-300 rounded-lg text-sm">
-            Complete all lessons to unlock
+            Locked
           </div>
         ) : (
           <Link

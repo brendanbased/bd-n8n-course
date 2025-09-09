@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, use } from 'react'
 import { courseModules } from '@/data/course-structure'
 import { Navbar } from '@/components/layout/navbar'
 import { LessonCard } from '@/components/course/lesson-card'
@@ -11,17 +11,18 @@ import { ArrowLeft, BookOpen, Code } from 'lucide-react'
 import Link from 'next/link'
 
 interface ModulePageProps {
-  params: {
+  params: Promise<{
     moduleId: string
-  }
+  }>
 }
 
 export default function ModulePage({ params }: ModulePageProps) {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [userProgress, setUserProgress] = useState<any[]>([])
-
-  const module = courseModules.find(m => m.id === params.moduleId)
+  
+  const resolvedParams = use(params)
+  const module = courseModules.find(m => m.id === resolvedParams.moduleId)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -120,7 +121,7 @@ export default function ModulePage({ params }: ModulePageProps) {
                 key={lesson.id}
                 lesson={lesson}
                 moduleId={module.id}
-                isLocked={index > 0 && !userProgress.some(p => p.lesson_id === module.lessons[index - 1].id && p.completed)}
+                isLocked={false}
                 isCompleted={userProgress.some(p => p.lesson_id === lesson.id && p.completed)}
               />
             ))}
@@ -133,7 +134,7 @@ export default function ModulePage({ params }: ModulePageProps) {
           <ProjectCard
             project={module.project}
             moduleId={module.id}
-            isLocked={completedLessons < module.lessons.length}
+            isLocked={false}
             isCompleted={userProgress.some(p => p.project_id === module.project.id && p.completed)}
           />
         </div>

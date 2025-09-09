@@ -64,7 +64,7 @@ export default function Dashboard() {
               <ModuleCard
                 key={module.id}
                 module={module}
-                isLocked={index > 0 && !userProgress.some(p => p.module_id === courseModules[index - 1].id && p.completed)}
+                isLocked={false}
                 progress={userProgress.filter(p => p.module_id === module.id)}
               />
             ))}

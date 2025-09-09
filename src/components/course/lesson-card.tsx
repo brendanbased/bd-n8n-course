@@ -1,6 +1,6 @@
 'use client'
 
-import { Play, CheckCircle, Lock, Clock } from 'lucide-react'
+import { Play, CheckCircle, Lock } from 'lucide-react'
 import Link from 'next/link'
 
 interface LessonCardProps {
@@ -46,12 +46,6 @@ export function LessonCard({ lesson, moduleId, isLocked, isCompleted }: LessonCa
               </span>
             </div>
             <p className="text-gray-300 text-sm mb-2">{lesson.description}</p>
-            <div className="flex items-center space-x-4 text-xs text-gray-400">
-              <div className="flex items-center space-x-1">
-                <Clock className="w-3 h-3" />
-                <span>~15 min</span>
-              </div>
-            </div>
           </div>
         </div>
 
