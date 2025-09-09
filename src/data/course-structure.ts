@@ -1,0 +1,228 @@
+export const courseModules = [
+  {
+    id: 'module-1',
+    title: 'N8n Fundamentals',
+    description: 'Learn the basics of N8n automation platform, interface navigation, and core concepts.',
+    order: 1,
+    lessons: [
+      {
+        id: 'lesson-1-1',
+        title: 'Introduction to N8n',
+        description: 'Understanding what N8n is and its role in automation',
+        order: 1,
+      },
+      {
+        id: 'lesson-1-2',
+        title: 'N8n Interface Overview',
+        description: 'Navigating the N8n interface and understanding the workflow editor',
+        order: 2,
+      },
+      {
+        id: 'lesson-1-3',
+        title: 'Basic Workflow Concepts',
+        description: 'Understanding nodes, connections, and data flow in N8n',
+        order: 3,
+      },
+    ],
+    project: {
+      id: 'project-1',
+      title: 'Your First Automation',
+      description: 'Create a simple workflow that demonstrates basic N8n concepts',
+      requirements: [
+        'Create a workflow with at least 3 nodes',
+        'Use a trigger node to start the workflow',
+        'Process data through at least one transformation',
+        'Output the result to a destination node',
+      ],
+    },
+  },
+  {
+    id: 'module-2',
+    title: 'Working with Triggers',
+    description: 'Master different types of triggers and how to use them effectively in your workflows.',
+    order: 2,
+    lessons: [
+      {
+        id: 'lesson-2-1',
+        title: 'Manual vs Automatic Triggers',
+        description: 'Understanding the difference between manual and automatic triggers',
+        order: 1,
+      },
+      {
+        id: 'lesson-2-2',
+        title: 'Webhook Triggers',
+        description: 'Setting up and using webhook triggers for real-time automation',
+        order: 2,
+      },
+      {
+        id: 'lesson-2-3',
+        title: 'Schedule and Polling Triggers',
+        description: 'Using cron schedules and polling triggers for time-based automation',
+        order: 3,
+      },
+    ],
+    project: {
+      id: 'project-2',
+      title: 'Multi-Trigger Workflow',
+      description: 'Build a workflow that uses multiple trigger types',
+      requirements: [
+        'Implement at least 2 different trigger types',
+        'Create conditional logic based on trigger source',
+        'Handle different data formats from various triggers',
+        'Set up proper error handling for each trigger type',
+      ],
+    },
+  },
+  {
+    id: 'module-3',
+    title: 'Data Transformation',
+    description: 'Learn how to manipulate, transform, and process data within your N8n workflows.',
+    order: 3,
+    lessons: [
+      {
+        id: 'lesson-3-1',
+        title: 'Understanding Data Structure',
+        description: 'How N8n handles data and the JSON format',
+        order: 1,
+      },
+      {
+        id: 'lesson-3-2',
+        title: 'Using the Set Node',
+        description: 'Transforming and restructuring data with the Set node',
+        order: 2,
+      },
+      {
+        id: 'lesson-3-3',
+        title: 'Function and Code Nodes',
+        description: 'Writing custom JavaScript for complex data transformations',
+        order: 3,
+      },
+    ],
+    project: {
+      id: 'project-3',
+      title: 'Data Processing Pipeline',
+      description: 'Create a comprehensive data transformation workflow',
+      requirements: [
+        'Process raw data from an external source',
+        'Clean and validate the data',
+        'Transform data into multiple output formats',
+        'Implement error handling for invalid data',
+        'Use both Set nodes and Function nodes',
+      ],
+    },
+  },
+  {
+    id: 'module-4',
+    title: 'API Integration',
+    description: 'Connect N8n with external services and APIs to create powerful integrations.',
+    order: 4,
+    lessons: [
+      {
+        id: 'lesson-4-1',
+        title: 'HTTP Request Node',
+        description: 'Making API calls and handling responses',
+        order: 1,
+      },
+      {
+        id: 'lesson-4-2',
+        title: 'Authentication Methods',
+        description: 'Implementing various authentication methods for APIs',
+        order: 2,
+      },
+      {
+        id: 'lesson-4-3',
+        title: 'Error Handling and Retries',
+        description: 'Building robust workflows with proper error handling',
+        order: 3,
+      },
+    ],
+    project: {
+      id: 'project-4',
+      title: 'Multi-Service Integration',
+      description: 'Build a workflow that integrates multiple external services',
+      requirements: [
+        'Connect to at least 3 different APIs',
+        'Implement proper authentication for each service',
+        'Handle rate limiting and API errors gracefully',
+        'Create a data synchronization workflow',
+        'Add monitoring and alerting for failures',
+      ],
+    },
+  },
+  {
+    id: 'module-5',
+    title: 'Advanced Workflows',
+    description: 'Build complex workflows with conditional logic, loops, and advanced patterns.',
+    order: 5,
+    lessons: [
+      {
+        id: 'lesson-5-1',
+        title: 'Conditional Logic and Branching',
+        description: 'Using IF nodes and Switch nodes for workflow control',
+        order: 1,
+      },
+      {
+        id: 'lesson-5-2',
+        title: 'Loops and Iterations',
+        description: 'Processing arrays and implementing loops in workflows',
+        order: 2,
+      },
+      {
+        id: 'lesson-5-3',
+        title: 'Sub-workflows and Modularity',
+        description: 'Creating reusable workflow components',
+        order: 3,
+      },
+    ],
+    project: {
+      id: 'project-5',
+      title: 'Complex Business Process Automation',
+      description: 'Automate a complex business process with multiple decision points',
+      requirements: [
+        'Implement complex conditional logic',
+        'Use loops to process multiple items',
+        'Create modular sub-workflows',
+        'Handle multiple data sources and destinations',
+        'Implement comprehensive logging and monitoring',
+      ],
+    },
+  },
+  {
+    id: 'module-6',
+    title: 'Production and Best Practices',
+    description: 'Deploy, monitor, and maintain N8n workflows in production environments.',
+    order: 6,
+    lessons: [
+      {
+        id: 'lesson-6-1',
+        title: 'Deployment Strategies',
+        description: 'Different ways to deploy N8n in production',
+        order: 1,
+      },
+      {
+        id: 'lesson-6-2',
+        title: 'Monitoring and Logging',
+        description: 'Setting up monitoring and logging for production workflows',
+        order: 2,
+      },
+      {
+        id: 'lesson-6-3',
+        title: 'Security and Best Practices',
+        description: 'Security considerations and workflow optimization',
+        order: 3,
+      },
+    ],
+    project: {
+      id: 'project-6',
+      title: 'Production-Ready Automation System',
+      description: 'Deploy a complete automation system with monitoring and security',
+      requirements: [
+        'Deploy N8n in a production environment',
+        'Implement comprehensive monitoring and alerting',
+        'Set up proper security measures and access controls',
+        'Create documentation and runbooks',
+        'Implement backup and disaster recovery procedures',
+      ],
+    },
+  },
+]
