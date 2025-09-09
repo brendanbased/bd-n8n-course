@@ -1,6 +1,6 @@
 'use client'
 
-import { Code, CheckCircle, Lock, Target, List, ChevronDown, ChevronUp, ExternalLink, Play } from 'lucide-react'
+import { Code, CheckCircle, Lock, ExternalLink, Play } from 'lucide-react'
 import { useState } from 'react'
 
 interface ProjectCardProps {
@@ -105,46 +105,11 @@ export function ProjectCard({ project, moduleId, isLocked, isCompleted, onComple
                   )}
                 </button>
                 
-                {(project.youtube_urls && project.youtube_urls.length > 0) && (
-                  <span className="text-xs text-gray-400">
-                    {project.youtube_urls.length === 1 ? 'Video Available' : `${project.youtube_urls.length} Videos Available`}
-                  </span>
-                )}
-                <div className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
-                  {isExpanded ? (
-                    <ChevronUp className="w-4 h-4 text-white" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-white" />
-                  )}
-                </div>
               </>
             )}
           </div>
         </div>
 
-        {/* Requirements - Always visible */}
-        <div className="mb-4">
-          <div className="flex items-center space-x-2 mb-3">
-            <Target className="w-4 h-4 text-purple-400" />
-            <h4 className="text-sm font-semibold text-white">Project Requirements</h4>
-          </div>
-          <div className="space-y-2">
-            {project.requirements.map((requirement, index) => (
-              <div key={index} className="flex items-start space-x-3">
-                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0" />
-                <p className="text-sm text-gray-300">{requirement}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="flex items-center space-x-4 text-xs text-gray-400">
-          <div className="flex items-center space-x-1">
-            <List className="w-3 h-3" />
-            <span>{project.requirements.length} Requirements</span>
-          </div>
-        </div>
       </div>
 
       {/* Expanded Content */}
@@ -154,7 +119,7 @@ export function ProjectCard({ project, moduleId, isLocked, isCompleted, onComple
             {project.youtube_urls && project.youtube_urls.length > 0 ? (
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-white mb-3">
-                  {project.youtube_urls.length === 1 ? 'Project Video' : 'Project Videos'}
+                  {project.youtube_urls.length === 1 ? 'Project Resource' : 'Project Resources'}
                 </h4>
                 <div className="space-y-2">
                   {project.youtube_urls.map((url, index) => (

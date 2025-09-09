@@ -1,6 +1,6 @@
 'use client'
 
-import { Play, CheckCircle, Lock, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react'
+import { Play, CheckCircle, Lock, ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 
 interface LessonCardProps {
@@ -105,18 +105,6 @@ export function LessonCard({ lesson, moduleId, isLocked, isCompleted, onComplete
                   )}
                 </button>
                 
-                {(lesson.youtube_urls && lesson.youtube_urls.length > 0) && (
-                  <span className="text-xs text-gray-400">
-                    {lesson.youtube_urls.length === 1 ? 'Video Available' : `${lesson.youtube_urls.length} Videos Available`}
-                  </span>
-                )}
-                <div className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
-                  {isExpanded ? (
-                    <ChevronUp className="w-4 h-4 text-white" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-white" />
-                  )}
-                </div>
               </>
             )}
           </div>
@@ -130,7 +118,7 @@ export function LessonCard({ lesson, moduleId, isLocked, isCompleted, onComplete
             {lesson.youtube_urls && lesson.youtube_urls.length > 0 ? (
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-white mb-3">
-                  {lesson.youtube_urls.length === 1 ? 'Video Lesson' : 'Video Lessons'}
+                  {lesson.youtube_urls.length === 1 ? 'Video Resource' : 'Video Resources'}
                 </h4>
                 <div className="space-y-2">
                   {lesson.youtube_urls.map((url, index) => (
