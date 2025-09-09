@@ -7,6 +7,7 @@ import { CourseDataService } from '@/lib/course-data'
 import { Navbar } from '@/components/layout/navbar'
 import { LessonCard } from '@/components/course/lesson-card'
 import { ProjectCard } from '@/components/course/project-card'
+import { DeveloperReset } from '@/components/course/developer-reset'
 import { ArrowLeft, BookOpen, Code } from 'lucide-react'
 import Link from 'next/link'
 import { Module, Lesson, Project, UserProgress } from '@/types'
@@ -40,7 +41,7 @@ export default function ModulePage({ params }: ModulePageProps) {
 
   const fetchData = async () => {
     try {
-      setLoading(true)
+      // Don't set loading to true - let the page render immediately
       setError(null)
 
       // Fetch module and user progress in parallel
@@ -60,17 +61,115 @@ export default function ModulePage({ params }: ModulePageProps) {
 
       const progressData = await progressResponse.json()
       
+      console.log('Fetched progress data:', progressData.progress)
       setModule(moduleData)
       setUserProgress(progressData.progress || [])
+      setLoading(false) // Only set loading to false when data is ready
     } catch (err) {
       console.error('Error fetching data:', err)
       setError('Failed to load module data. Please try again.')
-    } finally {
       setLoading(false)
     }
   }
 
-  if (status === 'loading' || loading) {
+  // Refresh progress data without showing loading screen
+  const refreshProgressData = async () => {
+    try {
+      console.log('Refreshing progress data silently...')
+      const progressResponse = await fetch('/api/progress')
+
+      if (!progressResponse.ok) {
+        throw new Error('Failed to fetch progress')
+      }
+
+      const progressData = await progressResponse.json()
+      console.log('Silently fetched progress data:', progressData.progress)
+      setUserProgress(progressData.progress || [])
+    } catch (err) {
+      console.error('Error refreshing progress data:', err)
+      // Don't show error to user for silent refresh
+    }
+  }
+
+  const handleLessonComplete = async (lessonId: string, moduleId: string) => {
+    try {
+      console.log('Attempting to complete lesson:', lessonId, 'in module:', moduleId)
+      const response = await fetch('/api/progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'lesson',
+          itemId: lessonId,
+          moduleId: moduleId,
+        }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        console.log('Lesson completion result:', result)
+        
+        if (result.alreadyCompleted) {
+          console.log('Lesson was already completed, no need to refresh')
+          return
+        }
+        
+        // Refresh progress data for new completions (silently)
+        await refreshProgressData()
+      } else {
+        try {
+          const error = await response.json()
+          console.error('Failed to mark lesson complete:', error)
+          alert(`Failed to mark lesson as complete: ${error.details || error.error || 'Unknown error'}`)
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError)
+          alert(`Failed to mark lesson as complete: HTTP ${response.status}`)
+        }
+      }
+    } catch (error) {
+      console.error('Error marking lesson complete:', error)
+      alert('Failed to mark lesson as complete. Please try again.')
+    }
+  }
+
+  const handleProjectComplete = async (projectId: string, moduleId: string) => {
+    try {
+      const response = await fetch('/api/progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'project',
+          itemId: projectId,
+          moduleId: moduleId,
+        }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        console.log('Project completion result:', result)
+        
+        if (result.alreadyCompleted) {
+          console.log('Project was already completed, no need to refresh')
+          return
+        }
+        
+        // Refresh progress data for new completions (silently)
+        await refreshProgressData()
+      } else {
+        const error = await response.json()
+        console.error('Failed to mark project complete:', error)
+        alert(`Failed to mark project as complete: ${error.details || error.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error marking project complete:', error)
+      alert('Failed to mark project as complete. Please try again.')
+    }
+  }
+
+  if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="text-center">
@@ -81,7 +180,7 @@ export default function ModulePage({ params }: ModulePageProps) {
     )
   }
 
-  if (!session || !module) {
+  if (!session) {
     return null
   }
 
@@ -100,6 +199,84 @@ export default function ModulePage({ params }: ModulePageProps) {
             </button>
           </div>
         </div>
+      </div>
+    )
+  }
+
+  // If module data is still loading, show skeleton
+  if (!module) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        <Navbar />
+        
+        <main className="container mx-auto px-4 py-8">
+          <div className="mb-8">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center space-x-2 text-gray-300 hover:text-white mb-4 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Dashboard</span>
+            </Link>
+            
+            {/* Module Header Skeleton */}
+            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 border border-white/20">
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex-1">
+                  <div className="h-10 bg-white/20 rounded-lg mb-4 animate-pulse"></div>
+                  <div className="h-6 bg-white/10 rounded-lg mb-4 animate-pulse"></div>
+                  <div className="flex items-center space-x-6">
+                    <div className="h-4 w-24 bg-white/10 rounded animate-pulse"></div>
+                    <div className="h-4 w-20 bg-white/10 rounded animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="h-8 w-16 bg-white/20 rounded-lg mb-1 animate-pulse"></div>
+                  <div className="h-4 w-12 bg-white/10 rounded animate-pulse"></div>
+                </div>
+              </div>
+              <div className="h-3 bg-gray-700 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Lessons Skeleton */}
+          <div className="mb-12">
+            <div className="h-8 w-32 bg-white/20 rounded-lg mb-6 animate-pulse"></div>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className="w-12 h-12 bg-white/20 rounded-lg animate-pulse"></div>
+                      <div className="flex-1">
+                        <div className="h-6 bg-white/20 rounded-lg mb-2 animate-pulse"></div>
+                        <div className="h-4 bg-white/10 rounded-lg animate-pulse"></div>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 bg-white/10 rounded-lg animate-pulse"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Project Skeleton */}
+          <div>
+            <div className="h-8 w-40 bg-white/20 rounded-lg mb-6 animate-pulse"></div>
+            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex items-start space-x-4 flex-1">
+                  <div className="w-16 h-16 bg-white/20 rounded-xl animate-pulse"></div>
+                  <div className="flex-1">
+                    <div className="h-7 bg-white/20 rounded-lg mb-2 animate-pulse"></div>
+                    <div className="h-5 bg-white/10 rounded-lg animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="w-10 h-10 bg-white/10 rounded-xl animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     )
   }
@@ -181,6 +358,7 @@ export default function ModulePage({ params }: ModulePageProps) {
                 moduleId={module.id}
                 isLocked={lesson.is_locked}
                 isCompleted={userProgress.some(p => p.lesson_id === lesson.id && p.completed)}
+                onComplete={handleLessonComplete}
               />
             ))}
           </div>
@@ -195,10 +373,13 @@ export default function ModulePage({ params }: ModulePageProps) {
               moduleId={module.id}
               isLocked={module.project.is_locked}
               isCompleted={userProgress.some(p => p.lesson_id === module.project?.id && p.completed)}
+              onComplete={handleProjectComplete}
             />
           </div>
         )}
       </main>
+      
+      <DeveloperReset onReset={refreshProgressData} />
     </div>
   )
 }

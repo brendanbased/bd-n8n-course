@@ -120,6 +120,7 @@ export class DatabaseService {
       .select('*')
       .eq('user_id', userId)
       .eq('completed', true)
+      .is('module_id', null) // Only get lesson-level progress records
     
     if (error) throw error
     return data || []
@@ -129,17 +130,43 @@ export class DatabaseService {
   static async markComplete(userId: string, lessonId: string, moduleId: string): Promise<void> {
     // Use admin client for server-side operations
     const supabaseAdmin = requireSupabaseAdmin()
-    const { error } = await supabaseAdmin
+    
+    // Check if progress record exists for this specific lesson (with null module_id)
+    const { data: existingRecord, error: selectError } = await supabaseAdmin
       .from('user_progress')
-      .upsert({
-        user_id: userId,
-        lesson_id: lessonId,
-        module_id: moduleId,
-        completed: true,
-        completed_at: new Date().toISOString()
-      }, {
-        onConflict: 'user_id,lesson_id'
-      })
+      .select('id')
+      .eq('user_id', userId)
+      .eq('lesson_id', lessonId)
+      .is('module_id', null)
+      .maybeSingle()
+
+    let error = null
+
+    if (selectError) {
+      error = selectError
+    } else if (existingRecord) {
+      // Update existing record
+      const result = await supabaseAdmin
+        .from('user_progress')
+        .update({
+          completed: true,
+          completed_at: new Date().toISOString(),
+        })
+        .eq('id', existingRecord.id)
+      error = result.error
+    } else {
+      // Insert new record with null module_id to avoid constraint
+      const result = await supabaseAdmin
+        .from('user_progress')
+        .insert({
+          user_id: userId,
+          lesson_id: lessonId,
+          module_id: null, // Set to null to avoid constraint
+          completed: true,
+          completed_at: new Date().toISOString()
+        })
+      error = result.error
+    }
     
     if (error) throw error
   }

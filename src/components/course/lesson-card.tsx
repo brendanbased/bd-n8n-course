@@ -15,14 +15,30 @@ interface LessonCardProps {
   moduleId: string
   isLocked: boolean
   isCompleted: boolean
+  onComplete?: (lessonId: string, moduleId: string) => Promise<void>
 }
 
-export function LessonCard({ lesson, moduleId, isLocked, isCompleted }: LessonCardProps) {
+export function LessonCard({ lesson, moduleId, isLocked, isCompleted, onComplete }: LessonCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isMarkingComplete, setIsMarkingComplete] = useState(false)
 
   const handleToggleExpand = () => {
     if (!isLocked) {
       setIsExpanded(!isExpanded)
+    }
+  }
+
+  const handleMarkComplete = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (isCompleted || isMarkingComplete || !onComplete) return
+    
+    setIsMarkingComplete(true)
+    try {
+      await onComplete(lesson.id, moduleId)
+    } catch (error) {
+      console.error('Failed to mark lesson complete:', error)
+    } finally {
+      setIsMarkingComplete(false)
     }
   }
 
@@ -70,6 +86,25 @@ export function LessonCard({ lesson, moduleId, isLocked, isCompleted }: LessonCa
               </div>
             ) : (
               <>
+                {/* Completion Checkbox */}
+                <button
+                  onClick={handleMarkComplete}
+                  disabled={isCompleted || isMarkingComplete}
+                  className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                    isCompleted
+                      ? 'bg-green-500 border-green-500 cursor-default'
+                      : isMarkingComplete
+                      ? 'bg-blue-500/50 border-blue-500 cursor-wait'
+                      : 'border-white/30 hover:border-green-400 hover:bg-green-400/20'
+                  }`}
+                  title={isCompleted ? 'Lesson completed' : 'Mark as complete'}
+                >
+                  {isCompleted && <CheckCircle className="w-5 h-5 text-white" />}
+                  {isMarkingComplete && (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  )}
+                </button>
+                
                 {(lesson.youtube_urls && lesson.youtube_urls.length > 0) && (
                   <span className="text-xs text-gray-400">
                     {lesson.youtube_urls.length === 1 ? 'Video Available' : `${lesson.youtube_urls.length} Videos Available`}

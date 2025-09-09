@@ -15,14 +15,30 @@ interface ProjectCardProps {
   moduleId: string
   isLocked: boolean
   isCompleted: boolean
+  onComplete?: (projectId: string, moduleId: string) => Promise<void>
 }
 
-export function ProjectCard({ project, moduleId, isLocked, isCompleted }: ProjectCardProps) {
+export function ProjectCard({ project, moduleId, isLocked, isCompleted, onComplete }: ProjectCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isMarkingComplete, setIsMarkingComplete] = useState(false)
 
   const handleToggleExpand = () => {
     if (!isLocked) {
       setIsExpanded(!isExpanded)
+    }
+  }
+
+  const handleMarkComplete = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (isCompleted || isMarkingComplete || !onComplete) return
+    
+    setIsMarkingComplete(true)
+    try {
+      await onComplete(project.id, moduleId)
+    } catch (error) {
+      console.error('Failed to mark project complete:', error)
+    } finally {
+      setIsMarkingComplete(false)
     }
   }
 
@@ -70,6 +86,25 @@ export function ProjectCard({ project, moduleId, isLocked, isCompleted }: Projec
               </div>
             ) : (
               <>
+                {/* Completion Checkbox */}
+                <button
+                  onClick={handleMarkComplete}
+                  disabled={isCompleted || isMarkingComplete}
+                  className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all duration-200 ${
+                    isCompleted
+                      ? 'bg-green-500 border-green-500 cursor-default'
+                      : isMarkingComplete
+                      ? 'bg-orange-500/50 border-orange-500 cursor-wait'
+                      : 'border-white/30 hover:border-green-400 hover:bg-green-400/20'
+                  }`}
+                  title={isCompleted ? 'Project completed' : 'Mark as complete'}
+                >
+                  {isCompleted && <CheckCircle className="w-6 h-6 text-white" />}
+                  {isMarkingComplete && (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  )}
+                </button>
+                
                 {(project.youtube_urls && project.youtube_urls.length > 0) && (
                   <span className="text-xs text-gray-400">
                     {project.youtube_urls.length === 1 ? 'Video Available' : `${project.youtube_urls.length} Videos Available`}

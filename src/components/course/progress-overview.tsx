@@ -1,53 +1,97 @@
 'use client'
 
 import { Trophy, Target, Clock, Star } from 'lucide-react'
+import { useMemo } from 'react'
 
 interface ProgressOverviewProps {
   userProgress: any[]
+  modules: Array<{
+    id: string
+    lessons: Array<{ id: string }>
+    project: { id: string } | null
+  }>
 }
 
-export function ProgressOverview({ userProgress }: ProgressOverviewProps) {
+export function ProgressOverview({ userProgress, modules }: ProgressOverviewProps) {
   // Calculate progress statistics
-  const totalModules = 6
-  const totalLessons = 18 // 6 modules × 3 lessons
-  const totalProjects = 6 // 1 project per module
+  const stats = useMemo(() => {
+    const totalModules = modules.length
+    const totalLessons = modules.reduce((sum, module) => sum + module.lessons.length, 0)
+    const totalProjects = modules.filter(module => module.project).length
 
-  const completedModules = 0 // TODO: Calculate from userProgress
-  const completedLessons = 0 // TODO: Calculate from userProgress
-  const completedProjects = 0 // TODO: Calculate from userProgress
+    // Get completed lesson IDs
+    const completedLessonIds = userProgress
+      .filter(p => p.completed && p.lesson_id)
+      .map(p => p.lesson_id)
 
-  const overallProgress = ((completedLessons + completedProjects) / (totalLessons + totalProjects)) * 100
+    // Count completed lessons and projects
+    let completedLessons = 0
+    let completedProjects = 0
+    let completedModules = 0
 
-  const stats = [
+    modules.forEach(module => {
+      const moduleLessonsCompleted = module.lessons.filter(lesson => 
+        completedLessonIds.includes(lesson.id)
+      ).length
+      
+      const moduleProjectCompleted = module.project && 
+        completedLessonIds.includes(module.project.id)
+
+      completedLessons += moduleLessonsCompleted
+      if (moduleProjectCompleted) completedProjects++
+
+      // Module is complete if all lessons and project are done
+      if (moduleLessonsCompleted === module.lessons.length && 
+          (!module.project || moduleProjectCompleted)) {
+        completedModules++
+      }
+    })
+
+    const overallProgress = totalLessons + totalProjects > 0 
+      ? ((completedLessons + completedProjects) / (totalLessons + totalProjects)) * 100 
+      : 0
+
+    return {
+      totalModules,
+      completedModules,
+      totalLessons,
+      completedLessons,
+      totalProjects,
+      completedProjects,
+      overallProgress
+    }
+  }, [userProgress, modules])
+
+  const statItems = [
     {
       icon: Target,
       label: 'Overall Progress',
-      value: `${Math.round(overallProgress)}%`,
+      value: `${Math.round(stats.overallProgress)}%`,
       color: 'from-purple-500 to-pink-500',
     },
     {
       icon: Trophy,
       label: 'Modules Completed',
-      value: `${completedModules}/${totalModules}`,
+      value: `${stats.completedModules}/${stats.totalModules}`,
       color: 'from-blue-500 to-cyan-500',
     },
     {
       icon: Star,
       label: 'Lessons Completed',
-      value: `${completedLessons}/${totalLessons}`,
+      value: `${stats.completedLessons}/${stats.totalLessons}`,
       color: 'from-green-500 to-emerald-500',
     },
     {
       icon: Clock,
       label: 'Projects Completed',
-      value: `${completedProjects}/${totalProjects}`,
+      value: `${stats.completedProjects}/${stats.totalProjects}`,
       color: 'from-orange-500 to-red-500',
     },
   ]
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {stats.map((stat, index) => {
+      {statItems.map((stat, index) => {
         const Icon = stat.icon
         return (
           <div
