@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, use } from 'react'
+import { useEffect, useState, use, useCallback } from 'react'
 import { CourseDataService } from '@/lib/course-data'
 import { Navbar } from '@/components/layout/navbar'
 import { LessonCard } from '@/components/course/lesson-card'
@@ -23,23 +23,12 @@ export default function ModulePage({ params }: ModulePageProps) {
   const router = useRouter()
   const [module, setModule] = useState<(Module & { lessons: Lesson[], project: Project | null }) | null>(null)
   const [userProgress, setUserProgress] = useState<UserProgress[]>([])
-  const [loading, setLoading] = useState(true)
+  const [, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
   const resolvedParams = use(params)
 
-  useEffect(() => {
-    if (status === 'loading') return
-
-    if (!session) {
-      router.push('/auth/signin')
-      return
-    }
-
-    fetchData()
-  }, [session, status, router, resolvedParams.moduleId])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       // Don't set loading to true - let the page render immediately
       setError(null)
@@ -70,7 +59,18 @@ export default function ModulePage({ params }: ModulePageProps) {
       setError('Failed to load module data. Please try again.')
       setLoading(false)
     }
-  }
+  }, [resolvedParams.moduleId, router])
+
+  useEffect(() => {
+    if (status === 'loading') return
+
+    if (!session) {
+      router.push('/auth/signin')
+      return
+    }
+
+    fetchData()
+  }, [session, status, router, resolvedParams.moduleId, fetchData])
 
   // Refresh progress data without showing loading screen
   const refreshProgressData = async () => {
@@ -395,7 +395,7 @@ export default function ModulePage({ params }: ModulePageProps) {
         <div className="mb-12">
           <h2 className="text-2xl font-bold text-white mb-6">Lessons</h2>
           <div className="space-y-4">
-            {module.lessons.map((lesson, index) => (
+            {module.lessons.map((lesson) => (
               <LessonCard
                 key={lesson.id}
                 lesson={lesson}

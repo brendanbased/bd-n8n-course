@@ -16,7 +16,7 @@ export default function Dashboard() {
   const router = useRouter()
   const [modules, setModules] = useState<(Module & { lessons: Lesson[], project: Project | null })[]>([])
   const [userProgress, setUserProgress] = useState<UserProgress[]>([])
-  const [loading, setLoading] = useState(true)
+  const [, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -236,7 +236,7 @@ export default function Dashboard() {
         <div className="mt-12">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-50 to-violet-100 bg-clip-text text-transparent mb-6">Course Modules</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {modules.map((module, index) => {
+            {modules.map((module) => {
               // Get progress for lessons in this module (lesson records have module_id = null)
               const allLessonIds = [...module.lessons.map(l => l.id), ...(module.project ? [module.project.id] : [])]
               const moduleProgress = userProgress.filter(p => 

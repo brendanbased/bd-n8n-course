@@ -5,7 +5,7 @@ import { DatabaseService } from '@/lib/database'
 import { authOptions } from '../auth/[...nextauth]/route'
 
 // Helper function to check if a module is completed
-async function checkModuleCompletion(userId: string, moduleId: string, supabaseAdmin: any): Promise<boolean> {
+async function checkModuleCompletion(userId: string, moduleId: string, supabaseAdmin: ReturnType<typeof requireSupabaseAdmin>): Promise<boolean> {
   try {
     // Get all lessons in the module
     const { data: moduleLessons } = await supabaseAdmin
@@ -199,7 +199,6 @@ export async function POST(request: NextRequest) {
 
     // Get item details for notification
     let itemTitle = ''
-    let moduleTitle = ''
 
     // Both lessons and projects are in the lessons table
     const { data: lesson } = await supabaseAdmin
@@ -209,7 +208,6 @@ export async function POST(request: NextRequest) {
       .single()
     
     itemTitle = lesson?.title || `Unknown ${type}`
-    moduleTitle = lesson?.modules?.title || 'Unknown Module'
 
     // Check if module is now completed and send Discord notifications
     try {
@@ -220,18 +218,18 @@ export async function POST(request: NextRequest) {
       
       if (moduleCompleted) {
         // Get module details for notification
-        const { data: module } = await supabaseAdmin
+        const { data: moduleData } = await supabaseAdmin
           .from('modules')
           .select('title, order_index')
           .eq('id', moduleId)
           .single()
         
-        if (module) {
+        if (moduleData) {
           // Send module completion notification
-          await discordBot.sendModuleCompletionNotification(user.id, module.title, module.order_index)
+          await discordBot.sendModuleCompletionNotification(user.id, moduleData.title, moduleData.order_index)
           
           // Check for role promotion based on module number
-          await discordBot.checkAndAssignRoles(user.id, module.order_index)
+          await discordBot.checkAndAssignRoles(user.id, moduleData.order_index)
         }
       }
     } catch (error) {
@@ -264,7 +262,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     

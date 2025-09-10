@@ -1,6 +1,6 @@
 'use client'
 
-import { Code, CheckCircle, Lock, ExternalLink, Play } from 'lucide-react'
+import { Code, CheckCircle, Lock } from 'lucide-react'
 import { useState } from 'react'
 
 interface ProjectCardProps {

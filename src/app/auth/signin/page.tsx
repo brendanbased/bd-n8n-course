@@ -94,7 +94,7 @@ export default function SignIn() {
           {/* What You'll Access Inside Section */}
           <div className="mb-8">
             <h3 className="text-2xl font-semibold bg-gradient-to-r from-white via-purple-50 to-violet-100 bg-clip-text text-transparent mb-6 text-center">
-              What You'll Access Inside
+              What You&apos;ll Access Inside
             </h3>
             
             <div className="grid grid-cols-2 gap-4 mb-6">

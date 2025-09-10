@@ -26,7 +26,7 @@ export class CourseDataService {
         const moduleLessons = allLessons.filter(lesson => lesson.module_id === module.id)
         
         // Find project lesson first (look for lessons with "project" in title or order_index >= 4)
-        let projectLesson = moduleLessons.find(lesson => 
+        const projectLesson = moduleLessons.find(lesson => 
           lesson.order_index === 4 || 
           lesson.title.toLowerCase().includes('project') ||
           lesson.order_index === Math.max(...moduleLessons.map(l => l.order_index))
@@ -88,7 +88,7 @@ export class CourseDataService {
       if (lessonsError) throw lessonsError
 
       // Find project lesson first (look for lessons with "project" in title or order_index >= 4)
-      let projectLesson = allLessons.find(lesson => 
+      const projectLesson = allLessons.find(lesson => 
         lesson.order_index === 4 || 
         lesson.title.toLowerCase().includes('project') ||
         lesson.order_index === Math.max(...allLessons.map(l => l.order_index))

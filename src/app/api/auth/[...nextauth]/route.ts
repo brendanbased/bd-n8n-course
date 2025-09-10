@@ -1,6 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import NextAuth from 'next-auth'
 import DiscordProvider from 'next-auth/providers/discord'
 import { DatabaseService } from '@/lib/database'
+import type { Account, Profile } from 'next-auth'
+
+interface DiscordProfile extends Profile {
+  id: string
+  username: string
+  avatar: string
+  email?: string
+}
 
 export const authOptions = {
   providers: [
@@ -10,19 +19,20 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ account, profile }: { user: unknown; account: Account | null; profile?: Profile }) {
       if (account?.provider === 'discord' && profile) {
         try {
           // Check if user exists using database service
-          const existingUser = await DatabaseService.getUserByDiscordId(profile.id)
+          const discordProfile = profile as DiscordProfile
+          const existingUser = await DatabaseService.getUserByDiscordId(discordProfile.id)
 
           if (!existingUser) {
             // Create new user using database service
             await DatabaseService.createUser({
-              discord_id: profile.id,
-              discord_username: profile.username,
-              discord_avatar: profile.avatar,
-              email: profile.email,
+              discord_id: discordProfile.id,
+              discord_username: discordProfile.username,
+              discord_avatar: discordProfile.avatar,
+              email: discordProfile.email,
             })
           }
           // Note: We don't update existing users on every login to avoid unnecessary DB calls
@@ -33,18 +43,18 @@ export const authOptions = {
       }
       return true
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (token.sub) {
         // Set the Discord ID as the user ID for the session
         session.user.id = token.sub
         
         try {
           // Get user data using database service
-          const user = await DatabaseService.getUserByDiscordId(token.sub)
+          const userData = await DatabaseService.getUserByDiscordId(token.sub)
 
-          if (user) {
-            session.user.supabase_id = user.id
-            session.user.discord_id = user.discord_id
+          if (userData) {
+            session.user.supabase_id = userData.id
+            session.user.discord_id = userData.discord_id
           }
         } catch (error) {
           console.error('Error fetching user in session:', error)
@@ -52,9 +62,9 @@ export const authOptions = {
       }
       return session
     },
-    async jwt({ token, account, profile }) {
+    async jwt({ token, account, profile }: { token: any; account: Account | null; profile?: Profile }) {
       if (account && profile) {
-        token.sub = profile.id
+        token.sub = (profile as DiscordProfile).id
       }
       return token
     },

@@ -1,5 +1,5 @@
 import { Client, GatewayIntentBits, TextChannel, EmbedBuilder } from 'discord.js'
-import { supabaseAdmin } from './supabase'
+import { requireSupabaseAdmin } from './supabase'
 
 class DiscordBot {
   private client: Client
@@ -49,6 +49,7 @@ class DiscordBot {
 
     try {
       // Get user data from Supabase
+      const supabaseAdmin = requireSupabaseAdmin()
       const { data: user } = await supabaseAdmin
         .from('users')
         .select('discord_username, discord_id')
@@ -99,6 +100,7 @@ class DiscordBot {
 
     try {
       // Get user data
+      const supabaseAdmin = requireSupabaseAdmin()
       const { data: user } = await supabaseAdmin
         .from('users')
         .select('discord_id')

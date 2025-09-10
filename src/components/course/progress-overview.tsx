@@ -4,7 +4,7 @@ import { Trophy, Target, Clock, Star } from 'lucide-react'
 import { useMemo } from 'react'
 
 interface ProgressOverviewProps {
-  userProgress: any[]
+  userProgress: Array<{ lesson_id?: string; completed: boolean }>
   modules: Array<{
     id: string
     lessons: Array<{ id: string }>

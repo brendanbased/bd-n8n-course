@@ -9,11 +9,11 @@ interface ModuleCardProps {
     title: string
     description: string
     order: number
-    lessons: any[]
-    project: any
+    lessons: Array<{ id: string }>
+    project: { id: string } | null
   }
   isLocked: boolean
-  progress: any[]
+  progress: Array<{ lesson_id?: string; completed: boolean }>
 }
 
 export function ModuleCard({ module, isLocked, progress }: ModuleCardProps) {
